@@ -206,30 +206,32 @@ export const VisualLab: React.FC<VisualLabProps> = ({ chemicals, isHeating = fal
       {/* ===== BÊN TRÁI: Khu vực thí nghiệm ===== */}
       <div className="flex-1 flex flex-col gap-4 min-w-0">
         {/* Status Bar */}
-        <div className="bg-blue-50 border border-blue-100 px-5 py-2.5 rounded-2xl flex items-center gap-3 text-blue-700 font-medium shadow-sm shrink-0">
+        <div className="bg-slate-800/80 backdrop-blur-sm border border-slate-700 px-5 py-2.5 rounded-2xl flex items-center gap-3 text-blue-300 font-medium shadow-lg shrink-0">
           <Info className="w-5 h-5 shrink-0" />
           {activeDropper ? (
             <span className="text-sm">
-              Đang cầm <strong className="text-blue-900">{activeChem?.name} ({activeChem?.formula})</strong>
-              <span className="text-blue-500 ml-1">— Nhấp vào ống nghiệm để nhỏ vào.</span>
+              Đang cầm <strong className="text-blue-200">{activeChem?.name} ({activeChem?.formula})</strong>
+              <span className="text-blue-400 ml-1">— Nhấp vào ống nghiệm để nhỏ vào.</span>
               <button
                 onClick={() => setActiveDropper(null)}
-                className="ml-3 inline-flex items-center gap-1 px-2 py-0.5 bg-blue-200/60 hover:bg-blue-200 rounded-lg text-xs font-bold text-blue-800 transition-colors"
+                className="ml-3 inline-flex items-center gap-1 px-2 py-0.5 bg-blue-500/30 hover:bg-blue-500/50 rounded-lg text-xs font-bold text-blue-200 transition-colors"
               >
                 <X className="w-3 h-3" /> Bỏ
               </button>
             </span>
           ) : (
-            <span className="text-sm">Chọn hóa chất từ danh sách bên phải để bắt đầu thí nghiệm.</span>
+            <span className="text-sm text-slate-300">Chọn hóa chất từ danh sách bên phải để bắt đầu thí nghiệm.</span>
           )}
         </div>
 
         {/* Khu vực ống nghiệm */}
-        <div className="relative flex-1 bg-white rounded-3xl shadow-sm border border-slate-100 p-6 flex flex-col items-center justify-end overflow-hidden min-h-[400px]">
+        <div className="relative flex-1 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 rounded-3xl shadow-xl border border-slate-700/50 p-6 flex flex-col items-center justify-end overflow-hidden min-h-[400px]">
           {/* Background */}
-          <div className="absolute inset-0 opacity-[0.03] pointer-events-none flex items-center justify-center">
+          <div className="absolute inset-0 opacity-[0.05] pointer-events-none flex items-center justify-center text-slate-400">
             <FlaskConical className="w-80 h-80" />
           </div>
+          {/* Grid background effect */}
+          <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(148,163,184,0.08) 1px, transparent 0)', backgroundSize: '24px 24px' }} />
 
           {/* Alcohol Lamp */}
           <div className="absolute -bottom-20 left-1/2 -translate-x-1/2 flex flex-col items-center z-10">
@@ -260,7 +262,7 @@ export const VisualLab: React.FC<VisualLabProps> = ({ chemicals, isHeating = fal
                 referrerPolicy="no-referrer"
               />
 
-              <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap bg-slate-800 text-white text-[10px] px-2 py-1 rounded">
+              <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap bg-slate-600 text-white text-[10px] px-2 py-1 rounded">
                 {isHeating ? "Tắt đèn cồn" : "Bật đèn cồn"}
               </div>
             </div>
@@ -269,20 +271,20 @@ export const VisualLab: React.FC<VisualLabProps> = ({ chemicals, isHeating = fal
           {/* Test Tube Rack */}
           <div className="relative w-full max-w-3xl">
             {/* Rack Frame */}
-            <div className="absolute bottom-0 left-0 right-0 h-20 bg-orange-900/10 border-t-4 border-orange-900/20 rounded-t-xl" />
-            <div className="absolute bottom-3 left-0 right-0 h-14 bg-orange-900/20 rounded-lg mx-4" />
+            <div className="absolute bottom-0 left-0 right-0 h-20 bg-amber-900/30 border-t-4 border-amber-800/40 rounded-t-xl" />
+            <div className="absolute bottom-3 left-0 right-0 h-14 bg-amber-900/40 rounded-lg mx-4" />
 
             {/* Tubes */}
             <div className="relative flex justify-around items-end px-6 gap-3">
               {testTubes.map(tube => (
                 <div key={tube.id} className="flex flex-col items-center gap-3 group">
-                  <div className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">Ống {tube.id}</div>
+                  <div className="text-[10px] font-bold text-slate-300 bg-slate-700/80 px-2 py-0.5 rounded-full border border-slate-600/50">Ống {tube.id}</div>
 
                   {/* Các hóa chất đã thêm */}
                   {tube.chemicals.length > 0 && (
                     <div className="flex flex-wrap gap-0.5 justify-center max-w-[60px]">
                       {tube.chemicals.map(chemId => (
-                        <span key={chemId} className="text-[8px] font-bold px-1 py-0 rounded bg-primary/10 text-primary leading-tight">
+                        <span key={chemId} className="text-[8px] font-bold px-1 py-0 rounded bg-primary/20 text-primary-foreground leading-tight border border-primary/30">
                           {chemicals.find(c => c.id === chemId)?.formula}
                         </span>
                       ))}
@@ -298,13 +300,13 @@ export const VisualLab: React.FC<VisualLabProps> = ({ chemicals, isHeating = fal
                     )}
                   >
                     {/* Glass Tube */}
-                    <div className="absolute inset-0 bg-white/30 backdrop-blur-sm border-2 border-slate-200 rounded-full overflow-hidden">
+                    <div className="absolute inset-0 bg-slate-800/40 backdrop-blur-sm border-2 border-slate-500/50 rounded-full overflow-hidden shadow-[inset_0_0_15px_rgba(0,0,0,0.3),0_0_10px_rgba(148,163,184,0.1)]">
                       {/* Liquid */}
                       <motion.div
                         initial={false}
                         animate={{ height: tube.chemicals.length > 0 ? '60%' : '0%' }}
                         className="absolute bottom-0 left-0 right-0 transition-colors duration-1000"
-                        style={{ backgroundColor: tube.color, opacity: 0.7 }}
+                        style={{ backgroundColor: tube.color, opacity: 0.85 }}
                       >
                         {/* Bubbles */}
                         {(tube.bubbles || (isHeating && tube.chemicals.length > 0)) && (
@@ -337,7 +339,7 @@ export const VisualLab: React.FC<VisualLabProps> = ({ chemicals, isHeating = fal
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
-                          className="absolute inset-0 flex items-center justify-center bg-white/40 backdrop-blur-[2px] rounded-full"
+                          className="absolute inset-0 flex items-center justify-center bg-slate-900/40 backdrop-blur-[2px] rounded-full"
                         >
                           <Loader2 className="w-5 h-5 text-primary animate-spin" />
                         </motion.div>
@@ -360,7 +362,7 @@ export const VisualLab: React.FC<VisualLabProps> = ({ chemicals, isHeating = fal
                     <motion.div
                       initial={{ opacity: 0, y: 5 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="text-[9px] font-medium text-slate-600 text-center max-w-[80px] leading-tight bg-slate-50 px-1.5 py-1 rounded-lg"
+                      className="text-[9px] font-medium text-slate-200 text-center max-w-[80px] leading-tight bg-slate-700/80 px-1.5 py-1 rounded-lg border border-slate-600/50 shadow-lg"
                     >
                       {tube.message}
                     </motion.div>
