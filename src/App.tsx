@@ -16,17 +16,19 @@ import {
   RotateCcw,
   Search,
   Plus,
-  Loader2
+  Loader2,
+  FileUp
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LabCanvas, ReactionEffect } from './components/LabCanvas';
 import { VisualLab } from './components/VisualLab';
+import { ProblemUploader } from './components/ProblemUploader';
 import { ApiKeyModal } from './components/ApiKeyModal';
 import { AITutor } from './components/AITutor';
 import { CHEMICALS, EXPERIMENTS, SUBJECTS } from './constants';
 import { cn } from './lib/utils';
 import Swal from 'sweetalert2';
-import { predictReaction } from './services/geminiService';
+import { predictReaction, LabProblemResult } from './services/geminiService';
 import { ApparatusType } from './types';
 
 import { QuizView } from './components/QuizView';
@@ -45,6 +47,8 @@ export default function App() {
   const [reactionLog, setReactionLog] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isQuizMode, setIsQuizMode] = useState(false);
+  const [isProblemUploaderOpen, setIsProblemUploaderOpen] = useState(false);
+  const [labProblemResult, setLabProblemResult] = useState<LabProblemResult | null>(null);
 
   const handleReaction = (data: any) => {
     setReactionLog(prev => [`[${new Date().toLocaleTimeString()}] ${data.message}`, ...prev]);
@@ -127,6 +131,49 @@ export default function App() {
       icon: 'success',
       timer: 2000,
       showConfirmButton: false
+    });
+  };
+
+  // Xử lý kết quả phân tích đề bài
+  const handleProblemResult = (result: LabProblemResult) => {
+    setLabProblemResult(result);
+    
+    // Merge hoá chất: dùng lại nếu trùng id, thêm mới nếu chưa có
+    const newChemicals = [...chemicals];
+    let addedCount = 0;
+    
+    result.chemicals.forEach(aiChem => {
+      const existingIndex = newChemicals.findIndex(
+        c => c.id === aiChem.id || c.formula.toLowerCase() === aiChem.formula.toLowerCase()
+      );
+      
+      if (existingIndex === -1) {
+        // Hoá chất mới - thêm vào danh sách
+        newChemicals.push({
+          ...aiChem,
+          id: aiChem.id || aiChem.formula.toLowerCase().replace(/[^a-z0-9]/g, ''),
+          concentration: aiChem.concentration || undefined,
+        });
+        addedCount++;
+      }
+    });
+    
+    setChemicals(newChemicals);
+    setActiveTab('lab');
+    setLabMode('visual');
+    setIsQuizMode(false);
+    
+    Swal.fire({
+      title: '✨ Phân tích thành công!',
+      html: `<div style="text-align:left">
+        <p><strong>Đề bài:</strong> ${result.problem_summary}</p>
+        <p style="margin-top:8px"><strong>Hoá chất:</strong> ${result.chemicals.length} loại${addedCount > 0 ? ` (${addedCount} mới)` : ''}</p>
+        <p style="margin-top:8px"><strong>Phương trình:</strong></p>
+        <ul>${result.equations.map(eq => `<li style="font-family:monospace;margin:4px 0">${eq}</li>`).join('')}</ul>
+      </div>`,
+      icon: 'success',
+      confirmButtonText: 'Bắt đầu thí nghiệm!',
+      confirmButtonColor: '#8b5cf6',
     });
   };
 
@@ -331,6 +378,12 @@ export default function App() {
                         </div>
                       </div>
                       <div className="flex gap-3">
+                        <button 
+                          onClick={() => setIsProblemUploaderOpen(true)}
+                          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-violet-600 to-blue-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-violet-500/20 hover:shadow-violet-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                        >
+                          <FileUp className="w-4 h-4" /> Tải đề bài
+                        </button>
                         <button 
                           onClick={resetLab}
                           className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-100 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
@@ -665,6 +718,11 @@ export default function App() {
       </main>
 
       <ApiKeyModal isOpen={isApiModalOpen} onClose={() => setIsApiModalOpen(false)} />
+      <ProblemUploader
+        isOpen={isProblemUploaderOpen}
+        onClose={() => setIsProblemUploaderOpen(false)}
+        onChemicalsGenerated={handleProblemResult}
+      />
     </div>
   );
 }
